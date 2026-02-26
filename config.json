@@ -1,0 +1,5 @@
+{
+    "Documents": [".txt", ".pdf"],
+    "Data": [".csv", ".xlsx"],
+    "logs": [".log"]
+}
