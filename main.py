@@ -30,7 +30,7 @@ for item in base_path.iterdir():
         if ext in sort_map:
             folder_name = sort_map[ext]
             dest_dir = base_path / folder_name
-            base_path.mkdir(parents=True, exist_ok=True)
+            dest_dir.mkdir(parents=True, exist_ok=True)
 
-            item.rename(dest_dir)
+            item.rename(dest_dir / item.name)
             print(f"移動完了: {dest_dir} -> {folder_name}")
