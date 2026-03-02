@@ -1,15 +1,37 @@
 # file-organizer-tool
 - 指定されたディレクトリ内のファイルを、拡張子に基づいて自動的にフォルダ分けするPythonツールです。
 
+
 # Demo
+
+## console出力
+実行時の進捗と最終的な集計結果が一目で確認できます。
 
 ```bash
 読み込まれたルール:{'Documents': ['.txt', '.pdf'], 'Data': ['.csv', '.xlsx']}
-移動完了: /Users/.../Documents -> Documents
-...
-フォルダ名：Documents/カウント回数：3回
-フォルダ名：Data/カウント回数：1回
+変換後のルール{'.txt': 'Documents', '.pdf': 'Documents', ...}
+
+移動完了: /Users/seto/Project/Documents -> Documents
+[error] report_v1.xlsx の移動ができませんでした。：[Errno 13] Permission denied
+移動完了: /Users/seto/Project/Data -> Data
+
+フォルダ名：Documents/カウント回数：5回
+フォルダ名：Data/カウント回数：3回
 ```
+
+## 生成されるログファイル (sort.log)
+例外が発生した際の理由や、秒単位の処理記録が永続的に保存されます。
+
+```bash
+2026-03-02 21:00:00 :>>>>>>>>>>>移動を開始します
+2026-03-02 21:00:01 :[移動成功] manual.pdf -> Documents
+2026-03-02 21:00:02 :[error] report_v1.xlsx の移動ができませんでした。：[Errno 13] Permission denied: 'report_v1.xlsx'
+2026-03-02 21:00:03 :[移動完了] フォルダ名：Documents に 5回 移動しました
+2026-03-02 21:00:03 :[移動完了] フォルダ名：Data に 3回 移動しました
+2026-03-02 21:00:03 :>>>>>>>>>>>[処理完了]
+```
+
+
 
 # Features
 - 自動フォルダ振り分け: 拡張子ごとにあらかじめ定義されたフォルダへ自動移動します。
