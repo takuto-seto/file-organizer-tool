@@ -1,11 +1,29 @@
-import json
 from datetime import datetime
 from pathlib import Path
+import json
+import sys
+
+
 
 def load_rules(config_path):
-    
-    with open(config_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+    if not config_path.exists():
+        print(f"[error] {config_path}が見つかりません。")
+        sys.exit(1)
+
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            rules = json.load(f)
+
+            if not rules:
+                print("設定ファイルの中身が空です。")
+                sys.exit()
+                
+                return rules
+            
+    except json.JSONDecodeError as e:    
+        print(f"[error] {config_path}設定ファイルの形式が正しくありません。")
+        sys.exit(1)
+
     
 base_path = Path(__file__).parent
 
@@ -18,11 +36,15 @@ print(f"読み込まれたルール:{rules}")
 sort_map = {}
 report = {}
 
-for folder_name, extensions in rules.items():
-    for ext in extensions:
-        sort_map[ext] = folder_name
+try:
+    for folder_name, extensions in rules.items():
+        for ext in extensions:
+            sort_map[ext] = folder_name
+    print(f"変換後のルール{sort_map}")
 
-print(f"変換後のルール{sort_map}")
+except AttributeError as e:
+    print("移動できるファイルがありません。")
+
 
 log_path = base_path / "sort.log"
 with open(log_path, "a", encoding="utf-8") as f:
@@ -66,9 +88,11 @@ with open(log_path, "a", encoding="utf-8") as f:
 
     for folder, count in report.items():
         print(f"フォルダ名：{folder}/カウント回数：{count}回")
+        
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
         log_msg = f"[移動完了] フォルダ名：{folder} に {count}回 移動しました"
         f.write(f"{now}:{log_msg}\n")
+
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
     log_comp = ">>>>>>>>>>>[処理完了]"
     f.write(f"{now}:{log_comp}\n\n")
