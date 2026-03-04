@@ -16,9 +16,9 @@ def load_rules(config_path):
 
             if not rules:
                 print("設定ファイルの中身が空です。")
-                sys.exit()
-                
-                return rules
+                sys.exit(1)
+            
+        return rules
             
     except json.JSONDecodeError as e:    
         print(f"[error] {config_path}設定ファイルの形式が正しくありません。")
@@ -46,7 +46,12 @@ except AttributeError as e:
     print("移動できるファイルがありません。")
 
 
-log_path = base_path / "sort.log"
+log_folder = base_path / "Logs"
+log_folder.mkdir(parents=True, exist_ok=True)
+
+today = datetime.now().strftime("%Y%m%d")
+log_path = log_folder / f"{today}_sort.log"
+
 with open(log_path, "a", encoding="utf-8") as f:
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
     log_start = f"{now}:>>>>>>>>>>>移動を開始します\n"
@@ -54,7 +59,7 @@ with open(log_path, "a", encoding="utf-8") as f:
 
     for item in list(base_path.iterdir()):
 
-        if item.is_file() and item.name not in [Path(__file__).name, "config.json", "sort.log"]:
+        if item.is_file() and item.name not in [Path(__file__).name, "config.json"]:
             ext = item.suffix
             if ext in sort_map:
                 folder_name = sort_map[ext]
