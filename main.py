@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 import json
 import sys
+import os
 
 
 
@@ -30,17 +31,23 @@ base_path = Path(__file__).parent
 config_file = base_path / "config.json"
 rules = load_rules(config_file)
 
-print(f"読み込まれたルール:{rules}")
+
+target_dir_str = rules.get("target_directory", "~")
+target_path = Path(target_dir_str).expanduser()
+print(f"DEBUG: 実際に中身を見に行っているパス -> {target_path.absolute()}")
+
+if not target_path.exists() or not target_path.is_dir():
+    print(f"[error] ターゲットディレクトリが見つかりません。: {target_dir_str}")
+    sys.exit(1)
 
 
 sort_map = {}
 report = {}
 
 try:
-    for folder_name, extensions in rules.items():
+    for folder_name, extensions in rules.get("rules", {}).items():
         for ext in extensions:
             sort_map[ext] = folder_name
-    print(f"変換後のルール{sort_map}")
 
 except AttributeError as e:
     print("移動できるファイルがありません。")
@@ -57,14 +64,15 @@ with open(log_path, "a", encoding="utf-8") as f:
     log_start = f"{now}:>>>>>>>>>>>移動を開始します\n"
     f.write(f"{log_start}")
 
-    for item in list(base_path.iterdir()):
+    for item in list(target_path.iterdir()):
 
-        if item.is_file() and item.name not in [Path(__file__).name, "config.json"]:
+        if item.is_file():
+            print(f"CHECK: {item.name} (拡張子: {item.suffix})")
             ext = item.suffix
             if ext in sort_map:
                 folder_name = sort_map[ext]
                 
-                dest_dir = base_path / folder_name
+                dest_dir = target_path / folder_name
                 dest_dir.mkdir(parents=True, exist_ok=True)
                 
                 dest_path = dest_dir / item.name

@@ -1,4 +1,8 @@
 {
-    "Documents": [".txt", ".pdf"],
-    "Data": [".csv", ".xlsx"]
+    "target_directory": "~/Desktop/test_sort",
+    "rules": {
+        "Documents": [".txt", ".pdf"],
+        "Data": [".csv", ".xlsx"]
+    }
+    
 }
