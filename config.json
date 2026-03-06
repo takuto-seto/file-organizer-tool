@@ -1,5 +1,6 @@
 {
-    "target_directory": "~/Desktop/test_sort",
+    "target_directory": ".",
+    "dry_run": true,
     "rules": {
         "Documents": [".txt", ".pdf"],
         "Data": [".csv", ".xlsx"]
