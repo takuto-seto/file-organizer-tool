@@ -59,9 +59,13 @@
 
 - ディレクトリ回避機能: ターゲット内のフォルダを誤ってスキャンしないよう、ファイルのみを対象にする安全フィルターを搭載。
 
+- 実行サマリー表: 処理終了後、どのフォルダに何件移動したかを、視認性の高いテーブル形式で表示します。
+
+- 合計カウント: 移動した全ファイルの総数を自動集計して表示。
+
 # Requirement
 - Python 
-- 使用ライブラリ: pathlib, datatime, json, sys
+- 使用ライブラリ: pathlib.Path, datetime.datetime, json, sys, os
 
 # App Profile
 - 開発ツール: VSCode / Wakatime（作業時間の可視化）

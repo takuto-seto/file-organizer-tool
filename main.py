@@ -108,23 +108,27 @@ with open(log_path, "a", encoding="utf-8") as f:
 
                 report[folder_name] = report.get(folder_name, 0) + 1
 
+
+    table_title = "リザルト(シミュレーション)" if is_dry_run else "リザルト"
+    summary_header = f"\n{"="*15}{table_title:^21}{"="*15}\n"
+    table_header = f"{"<引越し先のフォルダ名>":>35} |{"<処理回数>":>10} |"
+    separator = f"{"-" * 46}+{"-" * 16}"
+
+    print(summary_header)
+    print(table_header)
+    print(separator)
+
+    total_count = 0
+
     for folder, count in report.items():
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
-        log_msg = f"[移動完了] フォルダ名：{folder} に {count}回 移動しました"
-
-        if is_dry_run:
-            print(f"[シミュレーション]フォルダ名：{folder}/カウント回数：{count}回")
-            f.write(f"{now}[シミュレーション]{log_msg}\n")
-        else:
-            print(f"フォルダ名：{folder}/カウント回数：{count}回")
-            f.write(f"{now}:{log_msg}\n")
-            
-
+        log_msg = f"{folder:>45} |{count:>14} |\n{"-"*63}"
+        print(f"{log_msg}")
+        total_count += count
+    
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
-    log_comp = ">>>>>>>>>>>[処理完了]"
-    if is_dry_run:
-        print(f"[シミュレーション]{log_comp}")
-        f.write(f"{now}:[シミュレーション]{log_comp}\n\n")
-    else:
-        print(f"{log_comp}")
-        f.write(f"{now}:{log_comp}\n\n")
+    table_footer = f"{"合計":>43} |{total_count:>14} |"
+    log_comp = f"{table_footer}"
+
+    print(f"{log_comp}")
+    print(separator)
+    print(f"\n{">"*10}移動処理終了")
