@@ -1,9 +1,9 @@
 {
     "target_directory": ".",
     "dry_run": true,
+    "exclude_keywords": ["imp", "keep"],
     "rules": {
         "Documents": [".txt", ".pdf"],
         "Data": [".csv", ".xlsx"]
     }
-    
 }
