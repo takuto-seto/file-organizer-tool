@@ -61,6 +61,7 @@ log_folder.mkdir(parents=True, exist_ok=True)
 
 today = datetime.now().strftime("%Y%m%d")
 log_path = log_folder / f"{today}_sort.log"
+exclude_keywords = rules.get("exclude_keywords", [])
 
 with open(log_path, "a", encoding="utf-8") as f:
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
@@ -72,17 +73,30 @@ with open(log_path, "a", encoding="utf-8") as f:
         f.write(f"{log_start}")
 
     for item in list(target_path.iterdir()):
+
         if item.is_dir():
             continue
 
         if item.is_file():
+
+            skip_file = False
+            for keyword in exclude_keywords:
+                if keyword.lower() in item.name.lower():
+                    skip_file = True
+                    break
+
+            if skip_file:
+                print(f"除外ファイル:{item.name}")
+                continue
+                
+
             ext = item.suffix
             if ext in sort_map:
                 folder_name = sort_map[ext]                 
                 dest_dir = target_path / folder_name
                 
                 if is_dry_run:
-                        print(f"[シミュレーション]移動予定: {target_path} -> {folder_name}")
+                        print(f"[シミュレーション]移動予定: {item.name} {target_path} -> {folder_name}")
 
                 else:
                     dest_dir.mkdir(parents=True, exist_ok=True)
