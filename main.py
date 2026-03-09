@@ -25,108 +25,109 @@ def load_rules(config_path):
         print(f"[error] {config_path}設定ファイルの形式が正しくありません。")
         sys.exit(1)
 
-    
-base_path = Path(__file__).parent
+def main():
 
-config_file = base_path / "config.json"
-rules = load_rules(config_file)
+    base_path = Path(__file__).parent
 
-
-target_dir_str = rules.get("target_directory", "~")
-target_path = Path(target_dir_str).expanduser()
-
-if not target_path.exists() or not target_path.is_dir():
-    print(f"[error] ターゲットディレクトリが見つかりません。: {target_dir_str}")
-    sys.exit(1)
-
-is_dry_run = rules.get("dry_run", False)
-if is_dry_run:
-    print("シュミレーションモードです。実際にファイル操作はされません。")
+    config_file = base_path / "config.json"
+    rules = load_rules(config_file)
 
 
-sort_map = {}
-report = {}
+    target_dir_str = rules.get("target_directory", "~")
+    target_path = Path(target_dir_str).expanduser()
 
-try:
-    for folder_name, extensions in rules.get("rules", {}).items():
-        for ext in extensions:
-            sort_map[ext] = folder_name
+    if not target_path.exists() or not target_path.is_dir():
+        print(f"[error] ターゲットディレクトリが見つかりません。: {target_dir_str}")
+        sys.exit(1)
 
-except AttributeError as e:
-    print("移動できるファイルがありません。")
-
-
-log_folder = base_path / "Logs"
-log_folder.mkdir(parents=True, exist_ok=True)
-
-today = datetime.now().strftime("%Y%m%d")
-log_path = log_folder / f"{today}_sort.log"
-exclude_keywords = rules.get("exclude_keywords", [])
-
-with open(log_path, "a", encoding="utf-8") as f:
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
-    log_start = f">>>>>>>>>>>移動を開始します\n"
+    is_dry_run = rules.get("dry_run", False)
     if is_dry_run:
-        f.write(f"{now}:[シミュレーション]{log_start}")
-    
-    else:
-        f.write(f"{log_start}")
+        print("シュミレーションモードです。実際にファイル操作はされません。")
 
-    for item in list(target_path.iterdir()):
 
-        if item.is_dir():
-            continue
+    sort_map = {}
+    report = {}
 
-        if item.is_file():
+    try:
+        for folder_name, extensions in rules.get("rules", {}).items():
+            for ext in extensions:
+                sort_map[ext] = folder_name
 
-            skip_file = False
-            for keyword in exclude_keywords:
-                if keyword.lower() in item.name.lower():
-                    skip_file = True
-                    break
+    except AttributeError as e:
+        print("移動できるファイルがありません。")
 
-            if skip_file:
-                print(f"除外ファイル:{item.name}")
+
+    log_folder = base_path / "Logs"
+    log_folder.mkdir(parents=True, exist_ok=True)
+
+    today = datetime.now().strftime("%Y%m%d")
+    log_path = log_folder / f"{today}_sort.log"
+    exclude_keywords = rules.get("exclude_keywords", [])
+
+    with open(log_path, "a", encoding="utf-8") as f:
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
+        log_start = f">>>>>>>>>>>移動を開始します\n"
+        if is_dry_run:
+            f.write(f"{now}:[シミュレーション]{log_start}")
+        
+        else:
+            f.write(f"{log_start}")
+
+        for item in list(target_path.iterdir()):
+
+            if item.is_dir():
                 continue
-                
 
-            ext = item.suffix
-            if ext in sort_map:
-                folder_name = sort_map[ext]                 
-                dest_dir = target_path / folder_name
-                
-                if is_dry_run:
-                        print(f"[シミュレーション]移動予定: {item.name} {target_path} -> {folder_name}")
+            if item.is_file():
 
-                else:
-                    dest_dir.mkdir(parents=True, exist_ok=True)
-                    dest_path = dest_dir / item.name
-                    copy_count = 1 
-                    # 重複チェック
-                    while dest_path.exists():
-                        dest_path = dest_dir / f"{item.stem}({copy_count}){item.suffix}"
-                        copy_count += 1
+                skip_file = False
+                for keyword in exclude_keywords:
+                    if keyword.lower() in item.name.lower():
+                        skip_file = True
+                        break
 
-                    try:
-                        # 移動処理の実行            
-                        item.rename(dest_path)
+                if skip_file:
+                    print(f"除外ファイル:{item.name}")
+                    continue
                     
-                    except Exception as e:
-                        print(f"[error] {item.name} の移動ができませんでした。：{e}")
-                        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
-                        log_err = f"[error] {item.name} の移動ができませんでした。：{e}"
-                        f.write(f"{now}:{log_err}\n")
-                        continue
 
-                    print(f"移動完了: {dest_dir} -> {folder_name}")
+                ext = item.suffix
+                if ext in sort_map:
+                    folder_name = sort_map[ext]                 
+                    dest_dir = target_path / folder_name
+                    
+                    if is_dry_run:
+                            print(f"[シミュレーション]移動予定: {item.name} {target_path} -> {folder_name}")
 
-                report[folder_name] = report.get(folder_name, 0) + 1
+                    else:
+                        dest_dir.mkdir(parents=True, exist_ok=True)
+                        dest_path = dest_dir / item.name
+                        copy_count = 1 
+                        # 重複チェック
+                        while dest_path.exists():
+                            dest_path = dest_dir / f"{item.stem}({copy_count}){item.suffix}"
+                            copy_count += 1
+
+                        try:
+                            # 移動処理の実行            
+                            item.rename(dest_path)
+                        
+                        except Exception as e:
+                            print(f"[error] {item.name} の移動ができませんでした。：{e}")
+                            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
+                            log_err = f"[error] {item.name} の移動ができませんでした。：{e}"
+                            f.write(f"{now}:{log_err}\n")
+                            continue
+
+                        print(f"移動完了: {dest_dir} -> {folder_name}")
+
+                    report[folder_name] = report.get(folder_name, 0) + 1
 
 
-    table_title = "リザルト(シミュレーション)" if is_dry_run else "リザルト"
-    summary_header = f"\n{"="*15}{table_title:^21}{"="*15}\n"
-    table_header = f"{"<引越し先のフォルダ名>":>35} |{"<処理回数>":>10} |"
-    separator = f"{"-" * 46}+{"-" * 16}"
+        table_title = "リザルト(シミュレーション)" if is_dry_run else "リザルト"
+        summary_header = f"\n{"="*15}{table_title:^21}{"="*15}\n"
+        table_header = f"{"<引越し先のフォルダ名>":>35} |{"<処理回数>":>10} |"
+        separator = f"{"-" * 46}+{"-" * 16}"
 
     print(summary_header)
     print(table_header)
@@ -146,3 +147,6 @@ with open(log_path, "a", encoding="utf-8") as f:
     print(f"{log_comp}")
     print(separator)
     print(f"\n{">"*10}移動処理終了")
+
+    if __name__ = "__main__":
+        main()
